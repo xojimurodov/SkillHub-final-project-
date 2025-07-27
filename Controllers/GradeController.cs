@@ -18,15 +18,15 @@ public class GradeController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Mentor")]
     public async Task<IActionResult> Create([FromBody] GradeCreateDto dto)
     {
-        if (!User.IsInRole("Mentor"))
-            return BadRequest("You are not authorized to create grades.");
-        if (dto == null)
-            return BadRequest("Grade data is required.");
         try
         {
+            if (!User.IsInRole("Mentor"))
+                return BadRequest("You are not authorized to create grades.");
+            if (dto == null)
+                return BadRequest("Grade data is required.");
+
             var teacherId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _gradeService.CreateAsync(teacherId, dto);
             return Ok(result);
@@ -38,13 +38,12 @@ public class GradeController : ControllerBase
     }
 
     [HttpPut("{gradeId}")]
-    [Authorize(Roles = "Mentor")]
     public async Task<IActionResult> Update(int gradeId, [FromBody] GradeUpdateDto dto)
     {
-        if (!User.IsInRole("Mentor"))
-            return BadRequest("You are not authorized to create grades.");
         try
         {
+            if (!User.IsInRole("Mentor"))
+                return BadRequest("You are not authorized to create grades.");
             var teacherId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _gradeService.UpdateAsync(gradeId, teacherId, dto);
             return Ok(result);
@@ -56,13 +55,13 @@ public class GradeController : ControllerBase
     }
 
     [HttpDelete("{gradeId}")]
-    [Authorize(Roles = "Mentor")]
     public async Task<IActionResult> Delete(int gradeId)
     {
-        if (!User.IsInRole("Mentor"))
-            return BadRequest("You are not authorized to create grades.");
         try
         {
+            if (!User.IsInRole("Mentor"))
+                return BadRequest("You are not authorized to create grades.");
+
             var teacherId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             await _gradeService.DeleteAsync(gradeId, teacherId);
             return NoContent();
@@ -78,6 +77,11 @@ public class GradeController : ControllerBase
     {
         try
         {
+            if (_gradeService == null)
+            {
+                return NotFound("Grade service not found.");
+            }
+
             var result = await _gradeService.GetTopLearnersAsync(10);
             return Ok(result);
         }
@@ -86,6 +90,6 @@ public class GradeController : ControllerBase
             return StatusCode(500, new { error = "Failed to retrieve top students.", details = ex.Message });
         }
     }
-    
-    
+
+
 }

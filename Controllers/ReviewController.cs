@@ -19,8 +19,6 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Learner")]
-
     public async Task<IActionResult> Create([FromBody] ReviewCreateDto dto)
     {
         if (!User.IsInRole("Learner"))

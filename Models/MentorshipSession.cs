@@ -12,8 +12,6 @@ public class MentorshipSession
 
     public required int MentorId { get; set; }
     public User? Mentor { get; set; }
-
-    public List<Enrollment> Enrollments { get; set; } = new();
     public List<SessionTag> SessionTags { get; set; } = new();
 
 

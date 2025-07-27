@@ -6,6 +6,7 @@ using SkillHub.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace SkillHub.Services;
 
@@ -50,6 +51,27 @@ public class AuthService : IAuthService
             return "Invalid credentials";
 
         return GenerateJwt(user);
+    }
+
+    public async Task<string> GetAllAsync()
+    {
+        var users = await _context.Users
+            .Select(u => new { u.Id, u.Name, u.Email, u.Role })
+            .ToListAsync();
+
+        return JsonSerializer.Serialize(users);
+    }
+
+    public async Task<string> DeleteAsync(int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            return "User not found";
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        return "User deleted successfully";
     }
 
     private string GenerateJwt(Models.User user)
