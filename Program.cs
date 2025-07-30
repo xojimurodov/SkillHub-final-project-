@@ -17,12 +17,15 @@ builder.Services.AddControllers();
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "SuperSecretKey123!"; // временно
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IMentorshipSessionService, MentorshipSessionService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGradeService, GradeService>();
+builder.Services.AddScoped<IMentorReportService, MentorReportService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

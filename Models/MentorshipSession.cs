@@ -9,10 +9,12 @@ public class MentorshipSession
     public required int Difficulty { get; set; }
     public required string TimeFrame { get; set; }
     public required int Capacity { get; set; }
-
     public required int MentorId { get; set; }
     public User? Mentor { get; set; }
     public List<SessionTag> SessionTags { get; set; } = new();
+    public List<Review> Reviews { get; set; } = new();
+
+
 
 
 

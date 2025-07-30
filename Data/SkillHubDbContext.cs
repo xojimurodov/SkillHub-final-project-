@@ -16,6 +16,8 @@ public class SkillHubDbContext : DbContext
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<SessionTag> SessionTags => Set<SessionTag>();
     public DbSet<Grade> Grades => Set<Grade>();
+    public DbSet<MentorReport> MentorReports { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillHub.DTOs;
 using SkillHub.Interfaces;
@@ -16,24 +17,25 @@ public class MentorshipSessionController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Mentor, Admin")]
     public async Task<IActionResult> Create([FromBody] MentorshipSessionCreateDto dto)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var result = await _service.CreateAsync(dto);
-            return Ok($"{result.Id} created successfully");
+
+            if (result == null)
+                return BadRequest("Ошибка при создании сессии");
+
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
+            // Подробный лог
+            return StatusCode(500, $"Exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
         }
-
     }
+
 
 
     [HttpGet]
@@ -55,6 +57,7 @@ public class MentorshipSessionController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Mentor, Admin")]
     public async Task<IActionResult> Update(int id, MentorshipSessionCreateDto dto)
     {
         try
@@ -79,6 +82,7 @@ public class MentorshipSessionController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Mentor, Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         try

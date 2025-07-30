@@ -31,10 +31,13 @@ public class MentorshipSessionService : IMentorshipSessionService
         _context.MentorshipSessions.Add(session);
         await _context.SaveChangesAsync();
 
+        await _context.Entry(session).Reference(s => s.Mentor).LoadAsync();
+
         var tagNames = await _context.Tags
             .Where(t => dto.TagIds!.Contains(t.Id))
             .Select(t => t.Name)
             .ToListAsync();
+
 
         return new MentorshipSessionDto
         {
@@ -110,12 +113,13 @@ public class MentorshipSessionService : IMentorshipSessionService
         return true;
     }
 
-    public async Task<IEnumerable<MentorshipSession>> GetFilteredAsync(List<string>? tags = null)
+    public async Task<IEnumerable<MentorshipSessionDto>> GetFilteredAsync(List<string>? tags = null)
     {
         var query = _context.MentorshipSessions
             .Include(s => s.Mentor)
             .Include(s => s.SessionTags)
-            .ThenInclude(st => st.Tag)
+                .ThenInclude(st => st.Tag)
+            .Include(s => s.Reviews) // 👈 обязательно
             .AsQueryable();
 
         if (tags != null && tags.Any())
@@ -123,6 +127,20 @@ public class MentorshipSessionService : IMentorshipSessionService
             query = query.Where(s => s.SessionTags.Any(t => tags.Contains(t.Tag!.Name)));
         }
 
-        return await query.ToListAsync();
+        return await query
+            .Select(s => new MentorshipSessionDto
+            {
+                Id = s.Id,
+                Title = s.Title,
+                Description = s.Description,
+                TimeFrame = s.TimeFrame,
+                Capacity = s.Capacity,
+                Difficulty = s.Difficulty,
+                MentorId = s.MentorId,
+                MentorName = s.Mentor!.Name,
+                Tags = s.SessionTags.Select(st => st.Tag!.Name).ToList(),
+                AverageRating = s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0
+            })
+            .ToListAsync();
     }
 }

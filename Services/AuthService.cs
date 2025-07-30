@@ -5,6 +5,7 @@ using SkillHub.DTOs;
 using SkillHub.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -26,7 +27,7 @@ public class AuthService : IAuthService
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             return "Email already registered";
 
-        if(await _context.Users.AnyAsync(u => u.Name == dto.Name))
+        if (await _context.Users.AnyAsync(u => u.Name == dto.Name))
             return "Username already taken";
 
         var user = new Models.User
@@ -34,7 +35,7 @@ public class AuthService : IAuthService
             Name = dto.Name,
             Email = dto.Email,
             Role = Enum.Parse<Models.Role>(dto.Role, true),
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            PasswordHash = HashPassword(dto.Password)
         };
 
         _context.Users.Add(user);
@@ -47,7 +48,7 @@ public class AuthService : IAuthService
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
 
-        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user!.PasswordHash))
+        if (user == null || user.PasswordHash != HashPassword(dto.Password))
             return "Invalid credentials";
 
         return GenerateJwt(user);
@@ -91,5 +92,17 @@ public class AuthService : IAuthService
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    public string HashPassword(string password)
+    {
+        using var sha256 = SHA256.Create();
+        byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+        var builder = new StringBuilder();
+        foreach (var b in bytes)
+            builder.Append(b.ToString("x2"));
+
+        return builder.ToString();
     }
 }

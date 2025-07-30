@@ -8,4 +8,5 @@ public interface IAuthService
     Task<string> LoginAsync(LoginDto dto);
     Task<string> GetAllAsync();
     Task<string> DeleteAsync(int id);
+    string HashPassword(string password);
 }

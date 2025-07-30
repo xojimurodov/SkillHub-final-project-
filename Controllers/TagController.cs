@@ -20,7 +20,7 @@ public class TagController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(TagCreateDto dto)
     {
-        if(!User.IsInRole("Admin"))
+        if (!User.IsInRole("Admin"))
             return BadRequest("You are not authorized to create tags.");
         try
         {
@@ -50,4 +50,17 @@ public class TagController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var success = await _tagService.DeleteAsync(id);
+
+        if (!success)
+            return NotFound($"Tag with ID {id} not found");
+
+        return Ok($"Tag {id} deleted successfully");
+    }
+
 }

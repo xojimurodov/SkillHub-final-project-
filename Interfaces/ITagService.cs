@@ -7,4 +7,5 @@ public interface ITagService
 {
     Task<Tag> CreateAsync(TagCreateDto dto);
     Task<IEnumerable<Tag>> GetAllAsync();
+    Task<bool> DeleteAsync(int id);
 }

@@ -27,4 +27,22 @@ public class TagService : ITagService
     {
         return await _context.Tags.ToListAsync();
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var tag = await _context.Tags
+            .Include(t => t.SessionTags)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (tag == null)
+            return false;
+
+        _context.SessionTags.RemoveRange(tag.SessionTags);
+
+        _context.Tags.Remove(tag);
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
 }
